@@ -24,6 +24,8 @@ int main()
     }
     printf("%d\n",a[i]);
 }
+//test
+
 void swap(int *x, int *y)
 {
     int t = *x;
