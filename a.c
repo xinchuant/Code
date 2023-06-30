@@ -10,10 +10,11 @@ int main()
     int count = 0;
     int temp;
     scanf("%d",&temp);
-    while(temp!='\n')
+    while(temp!=10)
     {
-        scanf("%d",&temp);
         a[count++] = temp;
+        printf("Yes\n");
+        scanf("%d",&temp);
     }
     quick_sort(a,count);
     int i = 0;
@@ -21,7 +22,7 @@ int main()
     {
         printf("%d ",a[i]);
     }
-    printf("%d\n");
+    printf("%d\n",a[i]);
 }
 void swap(int *x, int *y)
 {
