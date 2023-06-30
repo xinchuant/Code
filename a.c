@@ -5,17 +5,11 @@
 #define small_scale 100
 
 void array_reset(int array[],int data[],int count);
-
 void swap(int *a, int *b);
-
 int partition(int array[], int low, int high);
-
 void quickSort(int array[], int low, int high);
-
 void merge(int array[], int low, int middle, int high);
-
 void mergeSort(int array[], int low, int high);
-
 double Time(int data[], int count,char mode);
 
 int main()
@@ -73,56 +67,63 @@ void array_reset(int array[],int data[],int count)//排序后重设数组，保�
     }
 }
 
-void swap(int *a, int *b)
+void swap(int *a, int *b)//交换元素
 {
     int t = *a;
     *a = *b;
     *b = t;
 }
-
+//选择一个基准元素，将数组分为两部分，一部分比基准小，一部分比基准大
 int partition(int array[], int low, int high)
 {
-    int pivot = array[high];
-    int i = (low - 1);
+    int pivot = array[high];//取末端为基准
+    int i = (low - 1);//下一个比基准小的元素要放置的位置
 
+    //从low到high遍历数组
     for (int j = low; j <= high - 1; j++)
-    {
+    {   
+        //元素小于基准则移到左边
         if (array[j] <= pivot)
         {
-            i++;
-            swap(&array[i], &array[j]);
+            i++;//移动到下一位置
+            swap(&array[i], &array[j]);//交换
         }
     }
-    swap(&array[i + 1], &array[high]);
-    return (i + 1);
+    swap(&array[i + 1], &array[high]);//把基准元素放到正确的位置
+    return (i + 1);//返回基准元素的位置
 }
 
 void quickSort(int array[], int low, int high)
 {
     if (low < high)
     {
-        int pi = partition(array, low, high);
-        quickSort(array, low, pi - 1);
-        quickSort(array, pi + 1, high);
+        int pi = partition(array, low, high);//对数组进行划分，返回基准元素的位置
+        quickSort(array, low, pi - 1);//对基准左边的数组进行排序
+        quickSort(array, pi + 1, high);//对基准右边的数组进行排序
     }
 }
 
 void merge(int array[], int low, int middle, int high)
 {
     int i, j, k;
-    int left = middle - low + 1;
-    int right = high - middle;
+    int left = middle - low + 1;//左子数组长度
+    int right = high - middle;//右子数组长度
 
-    int L[left], R[right];
+    int L[left], R[right];//创建子数组
 
+    //复制
     for (i = 0; i < left; i++)
+    {
         L[i] = array[low + i];
+    }
     for (j = 0; j < right; j++)
+    {
         R[j] = array[middle + 1 + j];
-
-    i = 0;
-    j = 0;
-    k = low;
+    }
+    i = 0;//左子数组的索引
+    j = 0;//右子树组的索引
+    k = low;//合并的数组（在原数组上）的索引
+    //合并两个子数组
     while (i < left && j < right)
     {
         if (L[i] <= R[j])
@@ -137,14 +138,14 @@ void merge(int array[], int low, int middle, int high)
         }
         k++;
     }
-
+    //复制左子数组的剩余元素到合并的数组
     while (i < left)
     {
         array[k] = L[i];
         i++;
         k++;
     }
-
+    //复制右子数组的剩余元素到合并的数组
     while (j < right)
     {
         array[k] = R[j];
@@ -157,10 +158,10 @@ void mergeSort(int arr[], int low, int high)
 {
     if (low < high)
     {
-        int middle = low + (high - low) / 2;
-        mergeSort(arr, low, middle);
-        mergeSort(arr, middle + 1, high);
-        merge(arr, low, middle, high);
+        int middle = low + (high - low) / 2;//找到中间的索引
+        mergeSort(arr, low, middle);//对左子数组排序
+        mergeSort(arr, middle + 1, high);//对右子数组排序
+        merge(arr, low, middle, high);//合并两个已排序的子数组
     }
 }
 
@@ -198,3 +199,4 @@ double Time(int data[], int count,char mode)//计时用函数
     time = time / 3;
     return time;
 }
+//直接编译运行即可，无需数据处理。
