@@ -199,4 +199,4 @@ double Time(int data[], int count,char mode)//计时用函数
     time = time / 3;
     return time;
 }
-//直接编译运行即可，无需数据处理。
+//直接编译运行即可，无需数据处理。可能需要一到两分钟，请耐心等待。
