@@ -41,12 +41,12 @@ int main()
         if (code[line][0] == '&') // 用于测试者结束输入指令
             break;
     }
-    //识别并执行指令
-    // for (int line = 0; !halt;line++)
-    // {
-    //     reconizing_instruction(code[line]);
-    // }
-    //输出寄存器内容
+    // 识别并执行指令
+    for (int line = 0; !halt;line++)
+    {
+        reconizing_instruction(code[line]);
+    }
+    // 输出寄存器内容
     for (int i = 0; i < 8; i++)
     {
         printf("R%d = x%04hX\n", i, R[i]);
@@ -250,5 +250,5 @@ void LEA(char c[])
 
 void TRAP_HALT_ONLY()
 {
-
+    halt = 1;
 }
