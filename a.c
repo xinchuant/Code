@@ -43,7 +43,7 @@ unsigned short unsigned_decimal_binary(char code[], int start, int end)
         if(code[point] == '1')
             ret += a;
         a *= 2;
-        point++;
+        point--;
     }
     return ret;
 }
