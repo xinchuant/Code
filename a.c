@@ -24,11 +24,11 @@ void TRAP_HALT_ONLY();
 unsigned short R[8] = {0x7777, 0x7777, 0x7777, 0x7777, 0x7777, 0x7777, 0x7777, 0x7777};
 int condition_code = 0;
 int halt = 0;
-char code[10000][16];
-char start_address_bin[16];
 
 int main()
 {
+    char code[10000][16];
+    char start_address_bin[16];
     //取得程序起始地址
     scanf("%s", start_address_bin);
     unsigned short start_address = unsigned_binary_to_decimal(start_address_bin, 0, 15);
@@ -42,10 +42,10 @@ int main()
             break;
     }
     //识别并执行指令
-    for (int line = 0; !halt;line++)
-    {
-        reconizing_instruction(code[line]);
-    }
+    // for (int line = 0; !halt;line++)
+    // {
+    //     reconizing_instruction(code[line]);
+    // }
     //输出寄存器内容
     for (int i = 0; i < 8; i++)
     {
