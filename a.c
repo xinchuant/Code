@@ -3,10 +3,11 @@
 #include <math.h>
 #include <string.h>
 
-unsigned short unsigned_decimal_binary(char code[], int start, int end);
-short signed_decimal_binary(char code[], int start, int end);
+unsigned short unsigned_binary_to_decimal(char code[], int start, int end);
+short signed_binary_to_decimal(char code[], int start, int end);
 
 unsigned short R[8] = {0x7777,0x7777,0x7777,0x7777,0x7777,0x7777,0x7777, 0x7777};
+int condition_code = 0;
 
 int main ()
 {
@@ -17,18 +18,19 @@ int main ()
         scanf("%s", code[line]);
         if(code[line][0] == EOF)
             break;
-        if(code[line][0] == '&')
+        if(code[line][0] == '&')//用于测试者结束输入指令
             break;
         line++;
     }
-    unsigned short start_address = unsigned_decimal_binary(code[line],0,15);
-    for (int i = 0; i < 8;i++)
+    unsigned short start_address = unsigned_binary_to_decimal(code[0],0,15);
+
+    for (int i = 0; i < 8; i++)
     {
         printf("R%d = x%04hX\n", i, R[i]);
     }
 }
 
-unsigned short unsigned_decimal_binary(char code[], int start, int end)
+unsigned short unsigned_binary_to_decimal(char code[], int start, int end)
 {
     unsigned short a = 1;
     unsigned short ret = 0;
@@ -43,7 +45,7 @@ unsigned short unsigned_decimal_binary(char code[], int start, int end)
     return ret;
 }
 
-short signed_decimal_binary(char code[], int start, int end)
+short signed_binary_to_decimal(char code[], int start, int end)
 {
     short flag = 1;
     short ret = 0;
