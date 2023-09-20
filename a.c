@@ -5,10 +5,10 @@
 
 unsigned short unsigned_binary_to_decimal(char c[], int start, int end);
 short signed_binary_to_decimal(char c[], int start, int end);
-void BR(char c[]);
+void BR(char c[],int *line);
 void ADD(char c[]);
 void LD(char c[],char b[],int line);
-void ST(char c[]);
+void ST(char *c[],int line);
 void JSR(char c[]);
 void AND(char c[]);
 void LDR(char c[]);
@@ -19,6 +19,8 @@ void STI(char c[]);
 void JMP(char c[]);
 void LEA(char c[]);
 void TRAP_HALT_ONLY();
+int set_condition_code_num(int DR);
+int set_condition_code_string(char c[]);
 
 unsigned short R[8] = {0x7777, 0x7777, 0x7777, 0x7777, 0x7777, 0x7777, 0x7777, 0x7777};
 int condition_code = 0;
@@ -26,7 +28,7 @@ int halt = 0;
 
 int main()
 {
-    char code[1000][16];
+    char code[1000][16] = {};
     char start_address_bin[16];
     //取得程序起始地址
     scanf("%s", start_address_bin);
@@ -37,7 +39,7 @@ int main()
         scanf("%s", code[line]);
         if (code[line][0] == EOF)
             break;
-        if (code[line][0] == '&') // 用于测试者结束输入指令
+        if (code[line][0] == '2') // 用于测试者结束输入指令
             break;
     }
     // 识别并执行指令
@@ -50,7 +52,7 @@ int main()
                 if (code[line][2] == '0')
                 {
                     if (code[line][3] == '0')
-                        BR(code[line]);
+                        BR(code[line],&line);
                     else
                         ADD(code[line]);
                 }
@@ -60,8 +62,25 @@ int main()
                     {
                         LD(code[line], code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)], line);
                     }
-                    else
-                        ST(code[line]);
+                    else//ST
+                    {
+                        int SR = 0;
+                        for (int i = 6; i >= 4; i--)
+                        {
+                            if (code[line][i] == '1')
+                                SR += pow(2, 6 - i);
+                        }
+                        unsigned short r = R[SR];
+                        for (int i = 15; i > -1; i--)
+                        {
+                            if (r % 2 == 1)
+                                code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)][i] = '1';
+                            else
+                                code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)][i] = '0';
+                            r /= 2;
+                        }
+                        condition_code = set_condition_code_string(code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)]);
+                    }
                 }
             }
             else
@@ -181,9 +200,10 @@ short signed_binary_to_decimal(char c[], int start, int end)
     return ret;
 }
 
-void BR(char c[])
+void BR(char c[],int *line)
 {
-
+    if ((c[4] == '1' && condition_code == -1) || (c[5] == '1' && condition_code == 0) || (c[6] == '1' && condition_code == 1))
+        *line = *line + signed_binary_to_decimal(c, 7, 15);
 }
 
 void ADD(char c[])
@@ -195,10 +215,10 @@ void ADD(char c[])
         if (c[i] == '1')
             DR += pow(2, 6 - i);
     }
-    for (int i = 9; i >= 7; i--)
+        for (int i = 9; i >= 7; i--)
     {
         if (c[i] == '1')
-            SR1 += pow(2, 6 - i);
+            SR1 += pow(2, 9 - i);
     }
     if(c[10] == '1')
         R[DR] = R[SR1] + signed_binary_to_decimal(c, 11, 15);
@@ -208,11 +228,11 @@ void ADD(char c[])
         for (int i = 15; i >= 13; i--)
         {
             if (c[i] == '1')
-                SR2 += pow(2, 6 - i);
+                SR2 += pow(2, 15 - i);
         }
         R[DR] = R[SR1] + R[SR2];
     }
-    //设置条件值
+    condition_code = set_condition_code_num(DR);
 }
 void LD(char c[],char b[],int line)
 {
@@ -223,22 +243,41 @@ void LD(char c[],char b[],int line)
             DR += pow(2, 6 - i);
     }
     R[DR] = unsigned_binary_to_decimal(b, 0, 15);
-    //设置条件值
-}
-
-void ST(char c[])
-{
-
+    condition_code = set_condition_code_num(DR);
 }
 
 void JSR(char c[])
 {
-
+    
 }
 
 void AND(char c[])
 {
-
+    int DR = 0;
+    int SR1 = 0;
+    for (int i = 6; i >= 4; i--)
+    {
+        if (c[i] == '1')
+            DR += pow(2, 6 - i);
+    }
+    for (int i = 9; i >= 7; i--)
+    {
+        if (c[i] == '1')
+            SR1 += pow(2, 9 - i);
+    }
+    if (c[10] == '1')
+        R[DR] = R[SR1] & signed_binary_to_decimal(c, 11, 15);
+    else
+    {
+        int SR2 = 0;
+        for (int i = 15; i >= 13; i--)
+        {
+            if (c[i] == '1')
+                SR2 += pow(2, 15 - i);
+        }
+        R[DR] = R[SR1] & R[SR2];
+    }
+    condition_code = set_condition_code_num(DR);
 }
 
 void LDR(char c[])
@@ -279,4 +318,32 @@ void LEA(char c[])
 void TRAP_HALT_ONLY()
 {
     halt = 1;
+}
+
+int set_condition_code_num(int DR)
+{
+    if(R[DR] == 0)
+        return 0;
+    else
+    {
+        unsigned short a = pow(2, 15);
+        unsigned short flag = a & R[DR];
+        if(flag == 0x8000)
+            return -1;
+        else
+            return 1;
+    }
+}
+
+int set_condition_code_string(char c[])
+{
+    if(c[0] == '1')
+        return -1;
+    else
+        for (int i = 0; i < 16; i++)
+        {
+            if(c[i] == '1')
+                return 1;
+        }
+    return 0;
 }
