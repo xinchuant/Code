@@ -1,13 +1,11 @@
 #include<stdio.h>
 #include<math.h>
-void change(char a[]);
+
 int main()
 {
-    char a[10] = "apple";
-    change(a);
-    printf("%s", a);
-}
-void change(char a[])
-{
-    a[0] = 'c';
+    unsigned short a = 0;
+    short b = -1;
+    unsigned short c = 0;
+    c = a + b;
+    printf("%d\n", c);
 }

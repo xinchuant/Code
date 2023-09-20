@@ -8,8 +8,7 @@ short signed_binary_to_decimal(char c[], int start, int end);
 void BR(char c[],unsigned short *line);
 void ADD(char c[]);
 void LD(char c[],char b[],unsigned short line);
-void ST(char *c[],unsigned short line);
-void JSR(char c[]);
+void JSR(char c[],unsigned short *line,unsigned short start_addres);
 void AND(char c[]);
 void LDR(char c[]);
 void STR(char c[]);
@@ -88,7 +87,7 @@ int main()
                 if (code[line][2] == '0')
                 {
                     if (code[line][3] == '0')
-                        JSR(code[line]);
+                        JSR(code[line],&line,start_address);
                     else
                         AND(code[line]);
                 }
@@ -246,9 +245,21 @@ void LD(char c[],char b[],unsigned short line)
     condition_code = set_condition_code_num(DR);
 }
 
-void JSR(char c[])
+void JSR(char c[],unsigned short *line,unsigned short start_address)
 {
-    
+    R[7] = *line + start_address;
+    if(c[4] == '0')
+    {
+        int BaseR = 0;
+        for (int i = 9; i >= 7; i--)
+        {
+            if (c[i] == '1')
+                BaseR += pow(2, 9 - i);
+        }
+        *line = R[BaseR];
+    }
+    else
+        *line = *line + si
 }
 
 void AND(char c[])
