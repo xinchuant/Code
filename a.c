@@ -5,10 +5,9 @@
 
 unsigned short unsigned_binary_to_decimal(char c[], int start, int end);
 short signed_binary_to_decimal(char c[], int start, int end);
-void reconizing_instruction(char c[]);
 void BR(char c[]);
 void ADD(char c[]);
-void LD(char c[]);
+void LD(char c[],char b[],int line);
 void ST(char c[]);
 void JSR(char c[]);
 void AND(char c[]);
@@ -27,7 +26,7 @@ int halt = 0;
 
 int main()
 {
-    char code[10000][16];
+    char code[1000][16];
     char start_address_bin[16];
     //取得程序起始地址
     scanf("%s", start_address_bin);
@@ -42,15 +41,81 @@ int main()
             break;
     }
     // 识别并执行指令
-    for (int line = 0; !halt;line++)
+    for (int line = 0; !halt; line++)
     {
-        reconizing_instruction(code[line]);
+        if (code[line][0] == '0')
+        {
+            if (code[line][1] == '0')
+            {
+                if (code[line][2] == '0')
+                {
+                    if (code[line][3] == '0')
+                        BR(code[line]);
+                    else
+                        ADD(code[line]);
+                }
+                else
+                {
+                    if (code[line][3] == '0')
+                    {
+                        LD(code[line], code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)], line);
+                    }
+                    else
+                        ST(code[line]);
+                }
+            }
+            else
+            {
+                if (code[line][2] == '0')
+                {
+                    if (code[line][3] == '0')
+                        JSR(code[line]);
+                    else
+                        AND(code[line]);
+                }
+                else
+                {
+                    if (code[line][3] == '0')
+                        LDR(code[line]);
+                    else
+                        STR(code[line]);
+                }
+            }
+        }
+        else
+        {
+            if (code[line][1] == '0')
+            {
+                if (code[line][2] == '0')
+                    NOT(code[line]);
+                else
+                {
+                    if (code[line][3] == '0')
+                        LDI(code[line]);
+                    else
+                        STI(code[line]);
+                }
+            }
+            else
+            {
+                if (code[line][2] == '0')
+                    JMP(code[line]);
+                else
+                {
+                    if (code[line][0] == '0')
+                        LEA(code[line]);
+                    else
+                        TRAP_HALT_ONLY();
+                }
+            }
+        }
     }
     // 输出寄存器内容
     for (int i = 0; i < 8; i++)
     {
         printf("R%d = x%04hX\n", i, R[i]);
     }
+    return 0;
 }
 
 unsigned short unsigned_binary_to_decimal(char c[], int start, int end)
@@ -116,74 +181,6 @@ short signed_binary_to_decimal(char c[], int start, int end)
     return ret;
 }
 
-void reconizing_instruction(char c[])
-{
-    if(c[0] == '0')
-    {
-        if(c[1] == '0')
-        {
-            if(c[2] == '0')
-            {
-                if(c[3] == '0')
-                    BR(c);
-                else
-                    ADD(c);
-            }
-            else
-            {
-                if(c[3] == '0')
-                    LD(c);
-                else
-                    ST(c);
-            }
-        }
-        else
-        {
-            if(c[2] == '0')
-            {
-                if(c[3] == '0')
-                    JSR(c);
-                else
-                    AND(c);
-            }
-            else
-            {
-                if(c[3] == '0')
-                    LDR(c);
-                else
-                    STR(c);
-            }
-        }
-    }
-    else
-    {
-        if(c[1] == '0')
-        {
-            if(c[2] == '0')
-                NOT(c);
-            else
-            {
-                if(c[3] == '0')
-                    LDI(c);
-                else
-                    STI(c);
-            }
-        }
-        else
-        {
-            if(c[2] == '0')
-                JMP(c);
-            else
-            {
-                if(c[0] == '0')
-                    LEA(c);
-                else
-                    TRAP_HALT_ONLY();
-            }
-        }
-    }
-}
-
 void BR(char c[])
 {
 
@@ -191,11 +188,42 @@ void BR(char c[])
 
 void ADD(char c[])
 {
-
+    int DR = 0;
+    int SR1 = 0;
+    for (int i = 6; i >= 4; i--)
+    {
+        if (c[i] == '1')
+            DR += pow(2, 6 - i);
+    }
+    for (int i = 9; i >= 7; i--)
+    {
+        if (c[i] == '1')
+            SR1 += pow(2, 6 - i);
+    }
+    if(c[10] == '1')
+        R[DR] = R[SR1] + signed_binary_to_decimal(c, 11, 15);
+    else
+    {
+        int SR2 = 0;
+        for (int i = 15; i >= 13; i--)
+        {
+            if (c[i] == '1')
+                SR2 += pow(2, 6 - i);
+        }
+        R[DR] = R[SR1] + R[SR2];
+    }
+    //设置条件值
 }
-void LD(char c[])
+void LD(char c[],char b[],int line)
 {
-
+    int DR = 0;
+    for (int i = 6; i >= 4; i--)
+    {
+        if(c[i] == '1')
+            DR += pow(2, 6 - i);
+    }
+    R[DR] = unsigned_binary_to_decimal(b, 0, 15);
+    //设置条件值
 }
 
 void ST(char c[])
