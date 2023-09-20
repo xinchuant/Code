@@ -24,7 +24,7 @@ int halt = 0;
 
 int main()
 {
-    char code[1000][16] = {};
+    char code[100000][16] = {};
     char start_address_bin[16];
     //取得程序起始地址
     scanf("%s", start_address_bin);
@@ -107,7 +107,7 @@ int main()
                                 code[address - start_address][i] = '1';
                             else
                                 code[address - start_address][i] = '0';
-                            r /= 2;
+                            r = r / 2;
                         }
                         condition_code = set_condition_code_string(code[address - start_address]);
                     }
@@ -122,7 +122,7 @@ int main()
                     NOT(code[line]);
                 else
                 {
-                    if (code[line][3] == '0')//LDI
+                    if (code[line][3] == '0')//LDI OK
                     {
                         int DR = recon_Register(code[line],4,6);
                         short offset9 = signed_binary_to_decimal(code[line], 7, 15);
@@ -136,15 +136,15 @@ int main()
                         short offset9 = signed_binary_to_decimal(code[line], 7, 15);
                         unsigned short address = line + 1 + offset9;
                         unsigned short r = R[SR];
-                        for (int i = 15; i > -1; i--)
+                        for (int i = 15; i > -1; i--) 
                         {
                             if (r % 2 == 1)
-                                code[unsigned_binary_to_decimal(code[address], 0, 15)][i] = '1';
+                                code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address][i] = '1';
                             else
-                                code[unsigned_binary_to_decimal(code[address], 0, 15)][i] = '0';
-                            r /= 2;
+                                code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address][i] = '0';
+                            r = r / 2;
                         }
-                        condition_code = set_condition_code_string(code[unsigned_binary_to_decimal(code[address], 0, 15)]);
+                        condition_code = set_condition_code_string(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address]);
                     }
                 }
             }
