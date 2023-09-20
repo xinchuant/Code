@@ -3,9 +3,8 @@
 
 int main()
 {
-    unsigned short a = 2;
+    unsigned short a = 0x0FFF;
     short b = -1;
-    unsigned short c = 0;
-    c = a + b;
-    printf("%d\n", c);
+    a = a + b;
+    printf("x%04hX\n", a);
 }

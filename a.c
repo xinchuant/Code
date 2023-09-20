@@ -10,11 +10,10 @@ void ADD(char c[]);
 void LD(char c[],char b[],unsigned short line);
 void JSR(char c[],unsigned short *line,unsigned short start_addres);
 void AND(char c[]);
-void STR(char c[]);
 void NOT(char c[]);
 void STI(char c[]);
 void JMP(char c[]);
-void LEA(char c[]);
+void LEA(char c[], unsigned short line);
 void TRAP_HALT_ONLY();
 int set_condition_code_num(int DR);
 int set_condition_code_string(char c[]);
@@ -93,10 +92,49 @@ int main()
                 {
                     if (code[line][3] == '0')//LDR
                     {
-
+                        int DR = 0;
+                        int BaseR = 0;
+                        for (int i = 6; i >= 4; i--)
+                        {
+                            if (code[line][i] == '1')
+                                DR += pow(2, 6 - i);
+                        }
+                        for (int i = 9; i >= 7; i--)
+                        {
+                            if (code[line][i] == '1')
+                                BaseR += pow(2, 9- i);
+                        }
+                        short offset6 = signed_binary_to_decimal(code[line], 10, 15);
+                        R[DR] = unsigned_binary_to_decimal(code[R[BaseR]+offset6], 0, 15);
+                        condition_code = set_condition_code_num(DR);
                     }
-                    else
-                        STR(code[line]);
+                    else//STR 注意地址与start address以及line的关系
+                    {
+                        int SR = 0;
+                        int BaseR = 0;
+                        for (int i = 6; i >= 4; i--)
+                        {
+                            if (code[line][i] == '1')
+                                SR += pow(2, 6 - i);
+                        }
+                        for (int i = 9; i >= 7; i--)
+                        {
+                            if (code[line][i] == '1')
+                                BaseR += pow(2, 9 - i);
+                        }
+                        short offset6 = signed_binary_to_decimal(code[line], 10, 15);
+                        unsigned short address = offset6 + R[BaseR];
+                        unsigned short r = R[SR];
+                        for (int i = 15; i > -1; i--)
+                        {
+                            if (r % 2 == 1)
+                                code[address - start_address][i] = '1';
+                            else
+                                code[address - start_address][i] = '0';
+                            r /= 2;
+                        }
+                        condition_code = set_condition_code_string(code[address - start_address]);
+                    }
                 }
             }
         }
@@ -117,14 +155,7 @@ int main()
                                 DR += pow(2, 6 - i);
                         }
                         short offset9 = signed_binary_to_decimal(code[line], 7, 15);
-                        unsigned short address = 0;
-                        if(offset9 < 0)
-                        {
-                            offset9 = -offset9;
-                            address = line + 1 - offset9;
-                        }
-                        else
-                            address = line + 1 + offset9;
+                        unsigned short address = line + 1 + offset9;
                         R[DR] = unsigned_binary_to_decimal(code[unsigned_binary_to_decimal(code[address], 0, 15)-start_address],0,15);
                         condition_code = set_condition_code_num(DR);
                     }
@@ -139,7 +170,7 @@ int main()
                 else
                 {
                     if (code[line][0] == '0')
-                        LEA(code[line]);
+                        LEA(code[line],line);
                     else
                         TRAP_HALT_ONLY();
                 }
@@ -279,14 +310,9 @@ void JSR(char c[],unsigned short *line,unsigned short start_address)
     else
     {
         short offset11 = signed_binary_to_decimal(c, 5, 15);
-        if (offset11 < 0)
-        {
-            offset11 = -offset11;
-            *line = *line - offset11;
-        }
-        else
-            *line = *line + offset11;
+        *line = *line + offset11;
     }
+        
 }
 
 void AND(char c[])
@@ -318,11 +344,6 @@ void AND(char c[])
     condition_code = set_condition_code_num(DR);
 }
 
-void STR(char c[])
-{
-
-}
-
 void NOT(char c[])
 {
     int DR = 0;
@@ -342,7 +363,7 @@ void NOT(char c[])
 
 void STI(char c[])
 {
-
+    
 }
 
 void JMP(char c[])
@@ -350,9 +371,16 @@ void JMP(char c[])
 
 }
 
-void LEA(char c[])
+void LEA(char c[], unsigned short line)
 {
-
+    int DR = 0;
+    for (int i = 6; i >= 4; i--)
+    {
+        if (c[i] == '1')
+            DR += pow(2, 6 - i);
+    }
+    short offset9 = signed_binary_to_decimal(c,7,15);
+    R[DR] = line + 1 + offset9;
 }
 
 void TRAP_HALT_ONLY()
