@@ -5,10 +5,10 @@
 
 unsigned short unsigned_binary_to_decimal(char c[], int start, int end);
 short signed_binary_to_decimal(char c[], int start, int end);
-void BR(char c[],int *line);
+void BR(char c[],unsigned short *line);
 void ADD(char c[]);
-void LD(char c[],char b[],int line);
-void ST(char *c[],int line);
+void LD(char c[],char b[],unsigned short line);
+void ST(char *c[],unsigned short line);
 void JSR(char c[]);
 void AND(char c[]);
 void LDR(char c[]);
@@ -43,7 +43,7 @@ int main()
             break;
     }
     // 识别并执行指令
-    for (int line = 0; !halt; line++)
+    for (unsigned short line = 0; !halt; line++)
     {
         if (code[line][0] == '0')
         {
@@ -200,7 +200,7 @@ short signed_binary_to_decimal(char c[], int start, int end)
     return ret;
 }
 
-void BR(char c[],int *line)
+void BR(char c[],unsigned short *line)
 {
     if ((c[4] == '1' && condition_code == -1) || (c[5] == '1' && condition_code == 0) || (c[6] == '1' && condition_code == 1))
         *line = *line + signed_binary_to_decimal(c, 7, 15);
@@ -234,7 +234,7 @@ void ADD(char c[])
     }
     condition_code = set_condition_code_num(DR);
 }
-void LD(char c[],char b[],int line)
+void LD(char c[],char b[],unsigned short line)
 {
     int DR = 0;
     for (int i = 6; i >= 4; i--)
