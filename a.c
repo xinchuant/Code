@@ -10,7 +10,6 @@ void ADD(char c[]);
 void LD(char c[],char b[],unsigned short line);
 void JSR(char c[],unsigned short *line,unsigned short start_addres);
 void AND(char c[]);
-void LDR(char c[]);
 void STR(char c[]);
 void NOT(char c[]);
 void STI(char c[]);
@@ -92,8 +91,10 @@ int main()
                 }
                 else
                 {
-                    if (code[line][3] == '0')
-                        LDR(code[line]);
+                    if (code[line][3] == '0')//LDR
+                    {
+
+                    }
                     else
                         STR(code[line]);
                 }
@@ -315,11 +316,6 @@ void AND(char c[])
         R[DR] = R[SR1] & R[SR2];
     }
     condition_code = set_condition_code_num(DR);
-}
-
-void LDR(char c[])
-{
-
 }
 
 void STR(char c[])
