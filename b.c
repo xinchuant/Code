@@ -3,8 +3,8 @@
 
 int main()
 {
-    unsigned short a = 0x0FFF;
-    short b = -1;
-    a = a + b;
-    printf("x%04hX\n", a);
+    unsigned short a = 1;
+    short b = -1 * a;
+    printf("x%04hX\n", b);
+    printf("%d\n", b);
 }
