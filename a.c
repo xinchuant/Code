@@ -115,7 +115,16 @@ int main()
                             if (code[line][i] == '1')
                                 DR += pow(2, 6 - i);
                         }
-                        R[DR] = unsigned_binary_to_decimal();
+                        short offset9 = signed_binary_to_decimal(code[line], 7, 15);
+                        unsigned short address = 0;
+                        if(offset9 < 0)
+                        {
+                            offset9 = -offset9;
+                            address = line + 1 - offset9;
+                        }
+                        else
+                            address = line + 1 + offset9;
+                        R[DR] = unsigned_binary_to_decimal(code[unsigned_binary_to_decimal(code[address], 0, 15)-start_address],0,15);
                         condition_code = set_condition_code_num(DR);
                     }
                     else
@@ -320,7 +329,19 @@ void STR(char c[])
 
 void NOT(char c[])
 {
-
+    int DR = 0;
+    int SR = 0;
+    for (int i = 6; i >= 4; i--)
+    {
+        if (c[i] == '1')
+            DR += pow(2, 6 - i);
+    }
+    for (int i = 9; i >= 7; i--)
+    {
+        if (c[i] == '1')
+            SR += pow(2, 9 - i);
+    }
+    R[DR] = ~R[SR];
 }
 
 void STI(char c[])
