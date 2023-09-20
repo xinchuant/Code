@@ -13,7 +13,6 @@ void AND(char c[]);
 void LDR(char c[]);
 void STR(char c[]);
 void NOT(char c[]);
-void LDI(char c[]);
 void STI(char c[]);
 void JMP(char c[]);
 void LEA(char c[]);
@@ -108,8 +107,17 @@ int main()
                     NOT(code[line]);
                 else
                 {
-                    if (code[line][3] == '0')
-                        LDI(code[line]);
+                    if (code[line][3] == '0')//LDI
+                    {
+                        int DR = 0;
+                        for (int i = 6; i >= 4; i--)
+                        {
+                            if (code[line][i] == '1')
+                                DR += pow(2, 6 - i);
+                        }
+                        R[DR] = unsigned_binary_to_decimal();
+                        condition_code = set_condition_code_num(DR);
+                    }
                     else
                         STI(code[line]);
                 }
@@ -247,8 +255,8 @@ void LD(char c[],char b[],unsigned short line)
 
 void JSR(char c[],unsigned short *line,unsigned short start_address)
 {
-    R[7] = *line + start_address;
-    if(c[4] == '0')
+    R[7] = *line + 1 + start_address;
+    if (c[4] == '0')
     {
         int BaseR = 0;
         for (int i = 9; i >= 7; i--)
@@ -256,10 +264,19 @@ void JSR(char c[],unsigned short *line,unsigned short start_address)
             if (c[i] == '1')
                 BaseR += pow(2, 9 - i);
         }
-        *line = R[BaseR];
+        *line = R[BaseR] - 1;
     }
     else
-        *line = *line + si
+    {
+        short offset11 = signed_binary_to_decimal(c, 5, 15);
+        if (offset11 < 0)
+        {
+            offset11 = -offset11;
+            *line = *line - offset11;
+        }
+        else
+            *line = *line + offset11;
+    }
 }
 
 void AND(char c[])
@@ -302,11 +319,6 @@ void STR(char c[])
 }
 
 void NOT(char c[])
-{
-
-}
-
-void LDI(char c[])
 {
 
 }
