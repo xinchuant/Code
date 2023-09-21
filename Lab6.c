@@ -39,8 +39,50 @@ int main()
             break;
     }
     // 识别并执行指令
+
     for (unsigned short line = 0; !halt; line++)
     {
+        unsigned short op_code = unsigned_binary_to_decimal(code[line], 0, 3);
+        switch (op_code)
+        {
+        case 0:
+            BR(code[line], &line);
+            break;
+        case 1:
+            ADD(code[line]);
+            break;
+        case 2:
+            
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+        case 6:
+            break;
+        case 7:
+            break;
+        case 8:
+            break;
+        case 9:
+            break;
+        case 10:
+            break;
+        case 11:
+            break;
+        case 12:
+            break;
+        case 13:
+            break;
+        case 14:
+            break;
+        case 15:
+            break;
+        default:
+            break;
+        }
         if (code[line][0] == '0')
         {
             if (code[line][1] == '0')
