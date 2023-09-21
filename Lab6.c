@@ -24,7 +24,7 @@ int halt = 0;
 
 int main()
 {
-    char code[100000][16] = {};
+    char code[60000][16] = {};
     char start_address_bin[16];
     //取得程序起始地址
     scanf("%s", start_address_bin);
@@ -35,11 +35,11 @@ int main()
         scanf("%s", code[line]);
         if (code[line][0] == EOF)
             break;
-        if (code[line][0] == '2') // 用于测试者结束输入指令
-            break;
     }
     // 识别并执行指令
-
+    int DR, SR, SR1, BaseR;
+    unsigned short r,address;
+    short offset6, offset9;
     for (unsigned short line = 0; !halt; line++)
     {
         unsigned short op_code = unsigned_binary_to_decimal(code[line], 0, 3);
@@ -52,156 +52,87 @@ int main()
             ADD(code[line]);
             break;
         case 2:
-            
+            LD(code[line], code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)], line);
             break;
-        case 3:
+        case 3://ST
+            SR = recon_Register(code[line], 4, 6);
+            r = R[SR];
+            offset9 = signed_binary_to_decimal(code[line], 7, 15);
+            for (int i = 15; i > -1; i--)
+            {
+                if (r % 2 == 1)
+                    code[line + 1 + offset9][i] = '1';
+                else
+                    code[line + 1 + offset9][i] = '0';
+                r = r / 2;
+            }
+            condition_code = set_condition_code_string(code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)]);
             break;
         case 4:
+            JSR(code[line], &line, start_address);
             break;
         case 5:
+            AND(code[line]);
             break;
-        case 6:
+        case 6://LDR
+            DR = recon_Register(code[line], 4, 6);
+            BaseR = recon_Register(code[line], 7, 9);
+            offset6 = signed_binary_to_decimal(code[line], 10, 15);
+            R[DR] = unsigned_binary_to_decimal(code[R[BaseR] + offset6 - start_address], 0, 15);
+            condition_code = set_condition_code_num(DR);
             break;
-        case 7:
-            break;
-        case 8:
+        case 7://STR
+            SR = recon_Register(code[line], 4, 6);
+            BaseR = recon_Register(code[line], 7, 9);
+            offset6 = signed_binary_to_decimal(code[line], 10, 15);
+            address = offset6 + R[BaseR];
+            r = R[SR];
+            for (int i = 15; i > -1; i--)
+            {
+                if (r % 2 == 1)
+                    code[address - start_address][i] = '1';
+                else
+                    code[address - start_address][i] = '0';
+                r = r / 2;
+            }
+            condition_code = set_condition_code_string(code[address - start_address]);
             break;
         case 9:
+            NOT(code[line]);
             break;
-        case 10:
+        case 10://LDI
+            DR = recon_Register(code[line], 4, 6);
+            offset9 = signed_binary_to_decimal(code[line], 7, 15);
+            address = line + 1 + offset9;
+            R[DR] = unsigned_binary_to_decimal(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address], 0, 15);
+            condition_code = set_condition_code_num(DR);
             break;
-        case 11:
+        case 11://STI
+            SR = recon_Register(code[line], 4, 6);
+            offset9 = signed_binary_to_decimal(code[line], 7, 15);
+            address = line + 1 + offset9;
+            r = R[SR];
+            for (int i = 15; i > -1; i--)
+            {
+                if (r % 2 == 1)
+                    code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address][i] = '1';
+                else
+                    code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address][i] = '0';
+                r = r / 2;
+            }
+            condition_code = set_condition_code_string(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address]);
             break;
         case 12:
-            break;
-        case 13:
+            JMP(code[line], &line, start_address);
             break;
         case 14:
+            LEA(code[line], line, start_address);
             break;
         case 15:
+            TRAP_HALT_ONLY();
             break;
         default:
             break;
-        }
-        if (code[line][0] == '0')
-        {
-            if (code[line][1] == '0')
-            {
-                if (code[line][2] == '0')
-                {
-                    if (code[line][3] == '0')
-                        BR(code[line],&line);
-                    else
-                        ADD(code[line]);
-                }
-                else
-                {
-                    if (code[line][3] == '0')
-                    {
-                        LD(code[line], code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)], line);
-                    }
-                    else//ST OK
-                    {
-                        int SR = recon_Register(code[line], 4, 6);
-                        unsigned short r = R[SR];
-                        short offset9 = signed_binary_to_decimal(code[line], 7, 15);
-                        for (int i = 15; i > -1; i--)
-                        {
-                            if (r % 2 == 1)
-                                code[line + 1 + offset9][i] = '1';
-                            else
-                                code[line + 1 + offset9][i] = '0';
-                            r = r / 2;
-                        }
-                        condition_code = set_condition_code_string(code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)]);
-                    }
-                }
-            }
-            else
-            {
-                if (code[line][2] == '0')
-                {
-                    if (code[line][3] == '0')
-                        JSR(code[line],&line,start_address);
-                    else
-                        AND(code[line]);
-                }
-                else
-                {
-                    if (code[line][3] == '0')//LDR OK
-                    {
-                        int DR = recon_Register(code[line], 4, 6);
-                        int BaseR = recon_Register(code[line], 7, 9);
-                        short offset6 = signed_binary_to_decimal(code[line], 10, 15);
-                        R[DR] = unsigned_binary_to_decimal(code[R[BaseR] + offset6 - start_address], 0, 15);
-                        condition_code = set_condition_code_num(DR);
-                    }
-                    else//STR 注意地址与start address以及line的关系
-                    {
-                        int SR = recon_Register(code[line], 4, 6);
-                        int BaseR = recon_Register(code[line], 7, 9);
-                        short offset6 = signed_binary_to_decimal(code[line], 10, 15);
-                        unsigned short address = offset6 + R[BaseR];
-                        unsigned short r = R[SR];
-                        for (int i = 15; i > -1; i--)
-                        {
-                            if (r % 2 == 1)
-                                code[address - start_address][i] = '1';
-                            else
-                                code[address - start_address][i] = '0';
-                            r = r / 2;
-                        }
-                        condition_code = set_condition_code_string(code[address - start_address]);
-                    }
-                }
-            }
-        }
-        else
-        {
-            if (code[line][1] == '0')
-            {
-                if (code[line][2] == '0')
-                    NOT(code[line]);
-                else
-                {
-                    if (code[line][3] == '0')//LDI OK
-                    {
-                        int DR = recon_Register(code[line],4,6);
-                        short offset9 = signed_binary_to_decimal(code[line], 7, 15);
-                        unsigned short address = line + 1 + offset9;
-                        R[DR] = unsigned_binary_to_decimal(code[unsigned_binary_to_decimal(code[address], 0, 15)-start_address],0,15);
-                        condition_code = set_condition_code_num(DR);
-                    }
-                    else//STI
-                    {
-                        int SR = recon_Register(code[line], 4, 6);
-                        short offset9 = signed_binary_to_decimal(code[line], 7, 15);
-                        unsigned short address = line + 1 + offset9;
-                        unsigned short r = R[SR];
-                        for (int i = 15; i > -1; i--) 
-                        {
-                            if (r % 2 == 1)
-                                code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address][i] = '1';
-                            else
-                                code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address][i] = '0';
-                            r = r / 2;
-                        }
-                        condition_code = set_condition_code_string(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address]);
-                    }
-                }
-            }
-            else
-            {
-                if (code[line][2] == '0')
-                    JMP(code[line], &line, start_address);
-                else
-                {
-                    if (code[line][3] == '0')
-                        LEA(code[line], line, start_address);
-                    else
-                        TRAP_HALT_ONLY();
-                }
-            }
         }
     }
     // 输出寄存器内容
@@ -211,7 +142,6 @@ int main()
     }
     return 0;
 }
-
 unsigned short unsigned_binary_to_decimal(char c[], int start, int end)
 {
     unsigned short a = 1;
@@ -226,7 +156,6 @@ unsigned short unsigned_binary_to_decimal(char c[], int start, int end)
     }
     return ret;
 }
-
 short signed_binary_to_decimal(char c[], int start, int end)
 {
     short flag = 1;
@@ -275,13 +204,11 @@ short signed_binary_to_decimal(char c[], int start, int end)
     ret = flag * unsigned_binary_to_decimal(code_copy, start, end);
     return ret;
 }
-//BR OK
 void BR(char c[],unsigned short *line)
 {
     if ((c[4] == '1' && condition_code == -1) || (c[5] == '1' && condition_code == 0) || (c[6] == '1' && condition_code == 1))
         *line = *line + signed_binary_to_decimal(c, 7, 15);
 }
-//ADD OK
 void ADD(char c[])
 {
     int DR = recon_Register(c,4,6);
@@ -300,14 +227,12 @@ void ADD(char c[])
     }
     condition_code = set_condition_code_num(DR);
 }
-//LD OK
 void LD(char c[],char b[],unsigned short line)
 {
     int DR = recon_Register(c, 4, 6);
     R[DR] = unsigned_binary_to_decimal(b, 0, 15);
     condition_code = set_condition_code_num(DR);
 }
-//JSR OK
 void JSR(char c[],unsigned short *line,unsigned short start_address)
 {
     R[7] = *line + 1 + start_address;
@@ -323,7 +248,6 @@ void JSR(char c[],unsigned short *line,unsigned short start_address)
     }
         
 }
-//AND OK
 void AND(char c[])
 {
     int DR = recon_Register(c, 4, 6);
@@ -337,7 +261,6 @@ void AND(char c[])
     }
     condition_code = set_condition_code_num(DR);
 }
-//NOT OK
 void NOT(char c[])
 {
     int DR = recon_Register(c, 4, 6);
@@ -345,25 +268,21 @@ void NOT(char c[])
     R[DR] = ~R[SR];
     condition_code = set_condition_code_num(DR);
 }
-//JMP OK
 void JMP(char c[],unsigned short *line, unsigned short start_address)
 {
     int BaseR = recon_Register(c, 7, 9);
     *line = R[BaseR] - start_address - 1;
 }
-//LEA OK 新版LEA应该不写条件码
 void LEA(char c[], unsigned short line, unsigned short start_address)
 {
     int DR = recon_Register(c, 4, 6);
     short offset9 = signed_binary_to_decimal(c,7,15);
     R[DR] = line + 1 + offset9 + start_address;
 }
-//HALT OK
 void TRAP_HALT_ONLY()
 {
     halt = 1;
 }
-
 int set_condition_code_num(int DR)
 {
     if(R[DR] == 0)
@@ -378,7 +297,6 @@ int set_condition_code_num(int DR)
             return 1;
     }
 }
-
 int set_condition_code_string(char c[])
 {
     if(c[0] == '1')
@@ -391,7 +309,6 @@ int set_condition_code_string(char c[])
         }
     return 0;
 }
-
 int recon_Register(char c[], int start, int end)
 {
     int ret = 0;
