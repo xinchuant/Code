@@ -17,6 +17,7 @@ void TRAP_HALT_ONLY();
 int set_condition_code_num(int DR);
 int set_condition_code_string(char c[]);
 int recon_Register(char c[], int start, int end);
+void write_to_memory(char c[], unsigned short r);
 
 unsigned short R[8] = {0x7777, 0x7777, 0x7777, 0x7777, 0x7777, 0x7777, 0x7777, 0x7777};
 int condition_code = 0;
@@ -58,14 +59,7 @@ int main()
             SR = recon_Register(code[line], 4, 6);
             r = R[SR];
             offset9 = signed_binary_to_decimal(code[line], 7, 15);
-            for (int i = 15; i > -1; i--)
-            {
-                if (r % 2 == 1)
-                    code[line + 1 + offset9][i] = '1';
-                else
-                    code[line + 1 + offset9][i] = '0';
-                r = r / 2;
-            }
+            write_to_memory(code[line + 1 + offset9], r);
             condition_code = set_condition_code_string(code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)]);
             break;
         case 4:
@@ -87,14 +81,7 @@ int main()
             offset6 = signed_binary_to_decimal(code[line], 10, 15);
             address = offset6 + R[BaseR];
             r = R[SR];
-            for (int i = 15; i > -1; i--)
-            {
-                if (r % 2 == 1)
-                    code[address - start_address][i] = '1';
-                else
-                    code[address - start_address][i] = '0';
-                r = r / 2;
-            }
+            write_to_memory(code[address - start_address], r);
             condition_code = set_condition_code_string(code[address - start_address]);
             break;
         case 9:
@@ -112,14 +99,7 @@ int main()
             offset9 = signed_binary_to_decimal(code[line], 7, 15);
             address = line + 1 + offset9;
             r = R[SR];
-            for (int i = 15; i > -1; i--)
-            {
-                if (r % 2 == 1)
-                    code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address][i] = '1';
-                else
-                    code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address][i] = '0';
-                r = r / 2;
-            }
+            write_to_memory(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address], r);
             condition_code = set_condition_code_string(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address]);
             break;
         case 12:
@@ -318,4 +298,15 @@ int recon_Register(char c[], int start, int end)
             ret += pow(2, end - i);
     }
     return ret;
+}
+void write_to_memory(char c[],unsigned short r)
+{
+    for (int i = 15; i > -1; i--)
+    {
+        if (r % 2 == 1)
+            c[i] = '1';
+        else
+            c[i] = '0';
+        r = r / 2;
+    }
 }
