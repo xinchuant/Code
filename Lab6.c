@@ -117,9 +117,7 @@ int main()
     }
     // 输出寄存器内容
     for (int i = 0; i < 8; i++)
-    {
         printf("R%d = x%04hX\n", i, R[i]);
-    }
     return 0;
 }
 unsigned short unsigned_binary_to_decimal(char c[], int start, int end)
@@ -143,9 +141,7 @@ short signed_binary_to_decimal(char c[], int start, int end)
     // 复制字符串,防止更改原二进制码
     char code_copy[16] = "0000000000000000";
     for (int i = 0; i < 16; i++)
-    {
         code_copy[i] = c[i];
-    }
     if (code_copy[start] == '1')
     {
         flag = -1;
@@ -199,10 +195,8 @@ void ADD(char c[])
     {
         int SR2 = 0;
         for (int i = 15; i >= 13; i--)
-        {
             if (c[i] == '1')
                 SR2 += pow(2, 15 - i);
-        }
         R[DR] = R[SR1] + R[SR2];
     }
     condition_code = set_condition_code_num(DR);
@@ -283,20 +277,16 @@ int set_condition_code_string(char c[])
         return -1;
     else
         for (int i = 0; i < 16; i++)
-        {
             if(c[i] == '1')
                 return 1;
-        }
     return 0;
 }
 int recon_Register(char c[], int start, int end)
 {
     int ret = 0;
     for (int i = end; i >= start; i--)
-    {
         if (c[i] == '1')
             ret += pow(2, end - i);
-    }
     return ret;
 }
 void write_to_memory(char c[],unsigned short r)
