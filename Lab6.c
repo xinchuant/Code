@@ -1,7 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
-#include <string.h>
 
 unsigned short unsigned_binary_to_decimal(char c[], int start, int end);
 short signed_binary_to_decimal(char c[], int start, int end);
