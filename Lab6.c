@@ -44,73 +44,73 @@ int main()
         unsigned short op_code = unsigned_binary_to_decimal(code[line], 0, 3);
         switch (op_code)
         {
-        case 0:
-            BR(code[line], &line);
-            break;
-        case 1:
-            ADD(code[line]);
-            break;
-        case 2:
-            LD(code[line], code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)], line);
-            break;
-        case 3://ST
-            SR = recon_Register(code[line], 4, 6);
-            r = R[SR];
-            offset9 = signed_binary_to_decimal(code[line], 7, 15);
-            write_to_memory(code[line + 1 + offset9], r);
-            condition_code = set_condition_code_string(code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)]);
-            break;
-        case 4:
-            JSR(code[line], &line, start_address);
-            break;
-        case 5:
-            AND(code[line]);
-            break;
-        case 6://LDR
-            DR = recon_Register(code[line], 4, 6);
-            BaseR = recon_Register(code[line], 7, 9);
-            offset6 = signed_binary_to_decimal(code[line], 10, 15);
-            R[DR] = unsigned_binary_to_decimal(code[R[BaseR] + offset6 - start_address], 0, 15);
-            condition_code = set_condition_code_num(DR);
-            break;
-        case 7://STR
-            SR = recon_Register(code[line], 4, 6);
-            BaseR = recon_Register(code[line], 7, 9);
-            offset6 = signed_binary_to_decimal(code[line], 10, 15);
-            address = offset6 + R[BaseR];
-            r = R[SR];
-            write_to_memory(code[address - start_address], r);
-            condition_code = set_condition_code_string(code[address - start_address]);
-            break;
-        case 9:
-            NOT(code[line]);
-            break;
-        case 10://LDI
-            DR = recon_Register(code[line], 4, 6);
-            offset9 = signed_binary_to_decimal(code[line], 7, 15);
-            address = line + 1 + offset9;
-            R[DR] = unsigned_binary_to_decimal(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address], 0, 15);
-            condition_code = set_condition_code_num(DR);
-            break;
-        case 11://STI
-            SR = recon_Register(code[line], 4, 6);
-            offset9 = signed_binary_to_decimal(code[line], 7, 15);
-            address = line + 1 + offset9;
-            r = R[SR];
-            write_to_memory(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address], r);
-            condition_code = set_condition_code_string(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address]);
-            break;
-        case 12:
-            JMP(code[line], &line, start_address);
-            break;
-        case 14:
-            LEA(code[line], line, start_address);
-            break;
-        case 15:
-            TRAP_HALT_ONLY();
-            break;
-        default:
-            break;
+            case 0:
+                BR(code[line], &line);
+                break;
+            case 1:
+                ADD(code[line]);
+                break;
+            case 2:
+                LD(code[line], code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)], line);
+                break;
+            case 3://ST
+                SR = recon_Register(code[line], 4, 6);
+                r = R[SR];
+                offset9 = signed_binary_to_decimal(code[line], 7, 15);
+                write_to_memory(code[line + 1 + offset9], r);
+                condition_code = set_condition_code_string(code[line + 1 + signed_binary_to_decimal(code[line], 7, 15)]);
+                break;
+            case 4:
+                JSR(code[line], &line, start_address);
+                break;
+            case 5:
+                AND(code[line]);
+                break;
+            case 6://LDR
+                DR = recon_Register(code[line], 4, 6);
+                BaseR = recon_Register(code[line], 7, 9);
+                offset6 = signed_binary_to_decimal(code[line], 10, 15);
+                R[DR] = unsigned_binary_to_decimal(code[R[BaseR] + offset6 - start_address], 0, 15);
+                condition_code = set_condition_code_num(DR);
+                break;
+            case 7://STR
+                SR = recon_Register(code[line], 4, 6);
+                BaseR = recon_Register(code[line], 7, 9);
+                offset6 = signed_binary_to_decimal(code[line], 10, 15);
+                address = offset6 + R[BaseR];
+                r = R[SR];
+                write_to_memory(code[address - start_address], r);
+                condition_code = set_condition_code_string(code[address - start_address]);
+                break;
+            case 9:
+                NOT(code[line]);
+                break;
+            case 10://LDI
+                DR = recon_Register(code[line], 4, 6);
+                offset9 = signed_binary_to_decimal(code[line], 7, 15);
+                address = line + 1 + offset9;
+                R[DR] = unsigned_binary_to_decimal(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address], 0, 15);
+                condition_code = set_condition_code_num(DR);
+                break;
+            case 11://STI
+                SR = recon_Register(code[line], 4, 6);
+                offset9 = signed_binary_to_decimal(code[line], 7, 15);
+                address = line + 1 + offset9;
+                r = R[SR];
+                write_to_memory(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address], r);
+                condition_code = set_condition_code_string(code[unsigned_binary_to_decimal(code[address], 0, 15) - start_address]);
+                break;
+            case 12:
+                JMP(code[line], &line, start_address);
+                break;
+            case 14:
+                LEA(code[line], line, start_address);
+                break;
+            case 15:
+                TRAP_HALT_ONLY();
+                break;
+            default:
+                break;
         }
     }
     // 输出寄存器内容
