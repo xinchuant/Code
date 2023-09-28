@@ -5,12 +5,12 @@ int main()
     scanf("%d %d", &n, &height);
     int ballon_positon[n];
     int counted_distance = 0;
-    int positon_to_jump = ballon_positon[0] - height;
     int ballon_popped = 1;
     int ballon_popped_max = 1;
     int ballon_interval[n - 1];
     for (int i = 0; i < n; i++)
         scanf("%d", &ballon_positon[i]);
+    int positon_to_jump = ballon_positon[0] - height;
     int j = 0;
     for (int i = 1; i < n; i++)
     {
